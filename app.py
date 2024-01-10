@@ -10,10 +10,16 @@ uploaded_file = st.sidebar.file_uploader("Choose a file")
 if uploaded_file is not None:
     bytes_data = uploaded_file.getvalue()
     data = bytes_data.decode("utf-8")
-    df = preprocessor.preprocess(data)
+    lines = data.splitlines()
+    first_line = lines[0]
+    pattern = preprocessor.find_matching_pattern(first_line)
+    print(pattern)
+    print("Hello this is new line!")
+    df = preprocessor.preprocess(data, pattern)
     st.dataframe(df)
     user_list = df['user'].unique().tolist()
-    user_list.remove('group_notification')
+    if 'group_notification' in user_list:
+        user_list.remove('group_notification')
     user_list.sort()
     user_list.insert(0, "Overall")
     selected_user = st.sidebar.selectbox("Show Analysis for ", user_list)
@@ -75,7 +81,7 @@ if uploaded_file is not None:
             plt.xticks(rotation='vertical')
             st.pyplot(fig)
 
-            st.header("Weekly Activity Map")
+            st.title("Weekly Activity Map")
             user_heatmap = helper.activity_heatmap(selected_user, df)
             fig, ax = plt.subplots()
             ax = sns.heatmap(user_heatmap)
